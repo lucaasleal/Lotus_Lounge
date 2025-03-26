@@ -11,16 +11,24 @@ typedef struct {
 } Resolution;
 
 Resolution resolutions[] = {
-    {854, 480},
     {1280, 720},
     {1920, 1080}
 };
 int numResolutions = sizeof(resolutions) / sizeof(resolutions[0]);
 
+typedef struct {
+    Rectangle rect;
+    char* text;
+} Button;
+
 int main(void)
 {
     InitWindow(BASE_WIDTH, BASE_HEIGHT, "Jogo Massa");
+    InitAudioDevice();
     SetTargetFPS(60);
+    
+    Sound Music_Lobby = LoadSound(".\\assets\\OCD\\Twilight_Zone.mp3");
+    PlaySound(Music_Lobby);
 
     // Variáveis para controle de estado
     bool isFullscreen = false;
@@ -30,6 +38,10 @@ int main(void)
 
     while (!WindowShouldClose())
     {
+        int fps = GetFPS();
+        char fpsText[32];
+        snprintf(fpsText, sizeof(fpsText), "FPS: %d", fps);
+        DrawText(fpsText, 10, 10, 20, DARKGRAY);
         // Obtém a resolução atual
         int screenWidth = GetScreenWidth();
         int screenHeight = GetScreenHeight();
@@ -171,7 +183,7 @@ int main(void)
                 SetWindowPosition(windowX, windowY);
             }
         }
-
+        
         // Tela de controles
         if (showControls) {
             // Fundo da tela de controles
@@ -205,6 +217,8 @@ int main(void)
 
         EndDrawing();
     }
+    UnloadSound(Music_Lobby);
+    CloseAudioDevice();
 
     CloseWindow();
     return 0;
