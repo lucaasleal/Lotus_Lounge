@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "raylib.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void FPS_visor() {
     int fps = GetFPS();
@@ -9,7 +10,7 @@ void FPS_visor() {
     DrawText(fpsText, 10, 10, 20, DARKGRAY);
 }
 
-void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, int numResolutions, Resolution *resolutions, int *selectedResolution) {
+void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, int numResolutions, Resolution *resolutions, int *selectedResolution, bool *init) {
     BeginDrawing();
     ClearBackground(RAYWHITE);
     
@@ -52,7 +53,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
         DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, WHITE);
         DrawText("Iniciar", screenWidth / 2 - 57 * scaleX, screenHeight/2.45, 15 * scaleY, BLACK);
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            //iniciar jogo
+            *init = !(*init);
         }
     }
     
@@ -77,6 +78,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
         DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, WHITE);
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             CloseWindow();
+            exit(0);
         }
     }
 

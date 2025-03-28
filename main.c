@@ -20,8 +20,8 @@ int main(void)
     InitAudioDevice();
     SetTargetFPS(60);
     
-    Sound Music_Lobby = LoadSound(".\\assets\\OCD\\Twilight_Zone.mp3");
-    PlaySound(Music_Lobby);
+    //Sound Music_Lobby = LoadSound(".\\assets\\OCD\\Twilight_Zone.mp3");
+    //PlaySound(Music_Lobby);
 
     // Variáveis para controle de estado
     bool isFullscreen = false;
@@ -29,16 +29,24 @@ int main(void)
     bool showControls = false; // Mostrar tela de controles
     bool showCredit = false;
     int selectedResolution = 1; // Índice da resolução atual (1920x1080)
+    bool init = 0;
+    int letterCount = 0;
+    int framesCounter = 0;
+    int velocidade = 4;
 
     while (!WindowShouldClose())
     {   
         FPS_visor();
-        Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, numResolutions, resolutions, &selectedResolution);
         if (IsKeyPressed(KEY_F)) {
             ToggleFullscreen();
         }
+        if (init){
+            text_board(&letterCount, &framesCounter, &velocidade);
+        } else {
+            Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, numResolutions, resolutions, &selectedResolution, &init);
+        }
     }
-    UnloadSound(Music_Lobby);
+    //UnloadSound(Music_Lobby);
     CloseAudioDevice();
     CloseWindow();
     return 0;
