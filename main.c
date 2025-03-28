@@ -27,12 +27,13 @@ int main(void)
     bool isFullscreen = false;
     bool showSettings = false;
     bool showControls = false; // Mostrar tela de controles
+    bool showCredit = false;
     int selectedResolution = 1; // Índice da resolução atual (1920x1080)
 
     while (!WindowShouldClose())
     {   
         FPS_visor();
-        Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, numResolutions, resolutions, &selectedResolution);
+        Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, numResolutions, resolutions, &selectedResolution);
         if (IsKeyPressed(KEY_F)) {
             ToggleFullscreen();
         }
