@@ -1,5 +1,6 @@
 #include "menu.h"
 #include "raylib.h"
+#include "math.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -44,6 +45,11 @@ void getPlayerPos(Player *player, Object *objects, int n_objects, float delta, f
     }
 }
 
+double getPlayerRotation(Player *player) {
+    Vector2 mousePos = GetMousePosition();
+    return (atan2f((player->position.y - mousePos.y), (player->position.x - mousePos.x)) * 180/PI + 270);
+}
+
 void DrawPlayer(Player player, float PLAYER_SPEED) {
     int frameWidth = player.texture.width / 4;   // Assumindo 4 colunas na spritesheet
     int frameHeight = player.texture.height / 4; // Assumindo 4 linhas na spritesheet
@@ -57,8 +63,10 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
         frameHeight * scale
     };
 
+    double rotation = getPlayerRotation(&player);
+
     Vector2 origin = {(frameWidth * scale) / 2, (frameHeight * scale*1.2) / 2.2}; // Ajusta a origem
-    DrawTexturePro(player.texture, source, dest, origin, 0, WHITE);
+    DrawTexturePro(player.texture, source, dest, origin, rotation, WHITE);
 }
 
 void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player){

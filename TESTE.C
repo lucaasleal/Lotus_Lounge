@@ -25,11 +25,6 @@ Player InitPlayer(Texture2D texture, Vector2 position) {
     return player;
 }
 
-double getPlayerRotation(Player *player) {
-    Vector2 mousePos = GetMousePosition();
-    return (atan2f((player->position.y - mousePos.y), (player->position.x - mousePos.x)) * 180/PI + 270);
-}
-
 void getPlayerPos(Player *player, Object *objects, int n_objects, float delta) {
     Vector2 movement = {0, 0};
     bool isMoving = false;
@@ -50,8 +45,8 @@ void getPlayerPos(Player *player, Object *objects, int n_objects, float delta) {
     if (!hit && isMoving) {
         double norm = 1;
         if(movement.x > 0 && movement.y > 0) norm = 1.41;
-        player->position.x += movement.x/norm * cos(getPlayerRotation(player));
-        player->position.y += movement.y/norm * sin(getPlayerRotation(player));
+        player->position.x += movement.x/norm;
+        player->position.y += movement.y/norm;
     }
 
     if (isMoving) {
@@ -63,6 +58,11 @@ void getPlayerPos(Player *player, Object *objects, int n_objects, float delta) {
     } else {
         player->frame = 0; // Mantém um único frame quando parado
     }
+}
+
+double getPlayerRotation(Player *player) {
+    Vector2 mousePos = GetMousePosition();
+    return (atan2f((player->position.y - mousePos.y), (player->position.x - mousePos.x)) * 180/PI + 270);
 }
 
 void DrawPlayer(Player player) {
