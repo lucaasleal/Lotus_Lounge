@@ -29,6 +29,10 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
 void text_board(int *framesCounter, int *letterCount, int *velocidade);
 Player InitPlayer(Texture2D texture, Vector2 position, float PLAYER_SPEED);
 void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player);
+void ShootBullet(Player *player);
+void UpdateBullets(float delta);
+void DrawBullets();
+
 
 #include "menu.c"
 #include "game.c"
