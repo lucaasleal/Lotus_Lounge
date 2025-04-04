@@ -35,7 +35,7 @@ int main(void)
     int framesCounter = 0;
     int velocidade = 4;
 
-    Texture2D spriteSheet = LoadTexture("C://Users//lucas//Downloads//boneco.png");
+    Texture2D spriteSheet = LoadTexture("imagens//boneco.png");
     Player player = InitPlayer(spriteSheet, (Vector2){BASE_WIDTH / 16, BASE_HEIGHT / 12}, PLAYER_SPEED);
 
     while (!WindowShouldClose())
