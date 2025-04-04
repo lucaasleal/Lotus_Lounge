@@ -4,11 +4,67 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef PI
+#define PI 3.14159265358979323846
+#endif
+
+
+#define MAX_BULLETS 100
+
+double getPlayerRotation(Player *player);
+
+// Estrutura do projétil
+typedef struct Bullet {
+    Vector2 position;
+    Vector2 velocity;
+    bool active;
+} Bullet;
+Bullet bullets[MAX_BULLETS];
 
 Player InitPlayer(Texture2D texture, Vector2 position, float PLAYER_SPEED) {
     Player player = {position, PLAYER_SPEED, texture, 0, 0.0f, 0};
     return player;
 }
+
+// Função para atirar
+void ShootBullet(Player *player) {
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (!bullets[i].active) {
+            bullets[i].position = (Vector2){player->position.x + 25, player->position.y + 25}; // centro do boneco
+            float angle = getPlayerRotation(player) * (PI / 180.0f);
+            bullets[i].velocity = (Vector2){cosf(angle) * 500, sinf(angle) * 500}; // velocidade
+            bullets[i].active = true;
+            break;
+        }
+    }
+}
+
+// Atualiza os tiros
+void UpdateBullets(float delta) {
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (bullets[i].active) {
+            bullets[i].position.x += bullets[i].velocity.x * delta;
+            bullets[i].position.y += bullets[i].velocity.y * delta;
+
+            // Se sair da tela, desativa
+            if (bullets[i].position.x < 0 || bullets[i].position.x > GetScreenWidth() ||
+                bullets[i].position.y < 0 || bullets[i].position.y > GetScreenHeight()) {
+                bullets[i].active = false;
+            }
+        }
+    }
+}
+
+// Desenha os tiros
+void DrawBullets() {
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (bullets[i].active) {
+            DrawCircleV(bullets[i].position, 5, RED);
+        }
+    }
+}
+
+
 
 void getPlayerPos(Player *player, Object *objects, int n_objects, float delta, float PLAYER_SPEED) {
     Vector2 movement = {0, 0};
@@ -78,15 +134,36 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player){
         {{WIDTH - 10, 0, 10, HEIGHT}, 1, BLACK}  // Parede direita
     };
     int num_objects = sizeof(objects) / sizeof(objects[0]);
-    BeginDrawing();
+
     float delta = GetFrameTime();
-    ClearBackground(WHITE);
+
+    // Atualiza posição do jogador
     getPlayerPos(player, objects, num_objects, delta, PLAYER_SPEED);
+
+    // Atira ao apertar espaço
+    if (IsKeyPressed(KEY_SPACE)) {
+        ShootBullet(player);
+    }
+
+    // Atualiza os tiros
+    UpdateBullets(delta);
+
+    // Desenho da cena
+    BeginDrawing();
+    ClearBackground(WHITE);
+
     DrawPlayer(*player, PLAYER_SPEED);
+
+    // Desenha obstáculos
     for (int i = 0; i < num_objects; ++i) {
         DrawRectangleV((Vector2){objects[i].rect.x, objects[i].rect.y}, 
-                    (Vector2){objects[i].rect.width, objects[i].rect.height}, 
-                    objects[i].color);
+                       (Vector2){objects[i].rect.width, objects[i].rect.height}, 
+                       objects[i].color);
     }
+
+    // Desenha os projéteis
+    DrawBullets();
+
     EndDrawing();
 }
+
