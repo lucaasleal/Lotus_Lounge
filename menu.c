@@ -11,8 +11,9 @@ void FPS_visor() {
 }
 
 void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, int numResolutions, Resolution *resolutions, int *selectedResolution, bool *init) {
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
+    // Comentei isso porque tava bugando o som
+    //BeginDrawing();
+    //ClearBackground(RAYWHITE);
     
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
