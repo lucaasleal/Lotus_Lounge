@@ -18,11 +18,12 @@ int main(void)
 {   
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(BASE_WIDTH, BASE_HEIGHT, "Jogo Massa");
+    SetAudioStreamBufferSizeDefault(1024);
     InitAudioDevice();
     SetTargetFPS(60);
     
-    //Sound Music_Lobby = LoadSound(".\\assets\\OCD\\Twilight_Zone.mp3");
-    //PlaySound(Music_Lobby);
+    Music Music_Lobby = LoadMusicStream(".\\assets\\OCD\\Twilight_Zone.ogg");
+    PlayMusicStream(Music_Lobby);
 
     // Variáveis para controle de estado
     bool isFullscreen = false;
@@ -40,6 +41,7 @@ int main(void)
 
     while (!WindowShouldClose())
     {   
+        UpdateMusicStream(Music_Lobby);
         if (!player.texture.id) {
             printf("Erro: Player não inicializado corretamente!\n");
             CloseAudioDevice();
@@ -51,12 +53,14 @@ int main(void)
             ToggleFullscreen();
         }
         if (init){
+            SetMusicVolume(Music_Lobby, 1.0f);
             Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player);
         } else {
+            SetMusicVolume(Music_Lobby, 0.5f);
             Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, numResolutions, resolutions, &selectedResolution, &init);
         }
     }
-    //UnloadSound(Music_Lobby);
+    UnloadMusicStream(Music_Lobby);
     CloseAudioDevice();
     CloseWindow();
     return 0;
