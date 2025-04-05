@@ -202,4 +202,3 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
 
     EndDrawing();
 }
-
