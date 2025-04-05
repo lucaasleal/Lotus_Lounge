@@ -5,11 +5,15 @@
 #include <stdlib.h>
 
 #ifndef PI
-#define PI 3.14159265358979323846
+#define PI 3.14
 #endif
 
+#define MAX_BULLETS 20
+#define RELOAD_TIME 2.0f // em segundos
 
-#define MAX_BULLETS 100
+int currentBullets = MAX_BULLETS;
+bool isReloading = false;
+float reloadTimer = 0.0f;
 
 double getPlayerRotation(Player *player);
 
@@ -28,12 +32,15 @@ Player InitPlayer(Texture2D texture, Vector2 position, float PLAYER_SPEED) {
 
 // Função para atirar
 void ShootBullet(Player *player) {
+    if(currentBullets<=0 || isReloading) return;
+
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (!bullets[i].active) {
             bullets[i].position = (Vector2){player->position.x + 25, player->position.y + 25}; // centro do boneco
-            float angle = getPlayerRotation(player) * (PI / 180.0f);
+            float angle = (getPlayerRotation(player)  - 90.0f)* (PI / 180.0f);
             bullets[i].velocity = (Vector2){cosf(angle) * 500, sinf(angle) * 500}; // velocidade
             bullets[i].active = true;
+            currentBullets--;
             break;
         }
     }
@@ -56,15 +63,25 @@ void UpdateBullets(float delta) {
 }
 
 // Desenha os tiros
-void DrawBullets() {
+void DrawBullets(Texture2D bulletTexture) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active) {
-            DrawCircleV(bullets[i].position, 5, RED);
+            float rotation = atan2f(bullets[i].velocity.y, bullets[i].velocity.x) * 180.0f / PI;
+            // Tamanho da bala na tela
+            float scale = 0.025f;
+            Rectangle source = {0, 0, (float)bulletTexture.width, (float)bulletTexture.height};
+            Rectangle dest = {
+                bullets[i].position.x,
+                bullets[i].position.y,
+                bulletTexture.width * scale,
+                bulletTexture.height * scale
+            };
+            Vector2 origin = {dest.width / 2, dest.height / 2};
+
+            DrawTexturePro(bulletTexture, source, dest, origin, rotation, WHITE);
         }
     }
 }
-
-
 
 void getPlayerPos(Player *player, Object *objects, int n_objects, float delta, float PLAYER_SPEED) {
     Vector2 movement = {0, 0};
@@ -125,7 +142,7 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
     DrawTexturePro(player.texture, source, dest, origin, rotation, WHITE);
 }
 
-void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player){
+void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture){
     Object objects[5] = {
         {{500, 500, 100, 100}, 1, RED},
         {{0, 0, WIDTH, 10}, 1, BLACK},  // Parede superior
@@ -141,28 +158,47 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player){
     getPlayerPos(player, objects, num_objects, delta, PLAYER_SPEED);
 
     // Atira ao apertar espaço
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         ShootBullet(player);
     }
-
     // Atualiza os tiros
     UpdateBullets(delta);
+
+    //Lógica de Recarga
+    if (((IsKeyPressed(KEY_R) && currentBullets < MAX_BULLETS) || 
+       (currentBullets==0 && (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)))) && !isReloading) {
+        isReloading = true;
+        reloadTimer = 0.0f;
+    }
+    
+    if (isReloading) {
+        reloadTimer += delta;
+        if (reloadTimer >= RELOAD_TIME) {
+            currentBullets = MAX_BULLETS;
+            isReloading = false;
+            reloadTimer = 0.0f;
+        }
+    }
 
     // Desenho da cena
     BeginDrawing();
     ClearBackground(WHITE);
 
     DrawPlayer(*player, PLAYER_SPEED);
-
     // Desenha obstáculos
     for (int i = 0; i < num_objects; ++i) {
         DrawRectangleV((Vector2){objects[i].rect.x, objects[i].rect.y}, 
                        (Vector2){objects[i].rect.width, objects[i].rect.height}, 
                        objects[i].color);
     }
-
     // Desenha os projéteis
-    DrawBullets();
+    DrawBullets(bulletTexture);
+
+    //Mostra Nº de Balas
+    DrawText(TextFormat("Balas: %d/%d", currentBullets, MAX_BULLETS), WIDTH-160, HEIGHT-90, 20, BLACK);
+    if (isReloading) {
+        DrawText("Recarregando...", WIDTH-(WIDTH/8), HEIGHT-(HEIGHT/4.5), 20, RED);
+    }
 
     EndDrawing();
 }

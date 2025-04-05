@@ -7,7 +7,7 @@ void FPS_visor() {
     int fps = GetFPS();
     char fpsText[32];
     snprintf(fpsText, sizeof(fpsText), "FPS: %d", fps);
-    DrawText(fpsText, 10, 10, 20, DARKGRAY);
+    DrawText(fpsText, 15, 10, 20, DARKGRAY);
 }
 
 void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, int numResolutions, Resolution *resolutions, int *selectedResolution, bool *init) {
