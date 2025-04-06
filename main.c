@@ -38,7 +38,8 @@ int main(void)
 
     Texture2D spriteSheet = LoadTexture("imagens//boneco.png");
     Texture2D bulletTexture = LoadTexture("imagens//bullet.png");
-    Player player = InitPlayer(spriteSheet, (Vector2){BASE_WIDTH / 16, BASE_HEIGHT / 12}, PLAYER_SPEED);
+    Texture2D phaseOneBG = LoadTexture("imagens/lotus_lounge_bar.png");
+    Player player = InitPlayer(spriteSheet, (Vector2){BASE_WIDTH / 2, BASE_HEIGHT / 2}, PLAYER_SPEED);
 
     while (!WindowShouldClose())
     {   
@@ -55,7 +56,7 @@ int main(void)
         }
         if (init){
             SetMusicVolume(Music_Lobby, 1.0f);
-            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture);
+            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG);
         } else {
             SetMusicVolume(Music_Lobby, 0.5f);
             Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, numResolutions, resolutions, &selectedResolution, &init);
