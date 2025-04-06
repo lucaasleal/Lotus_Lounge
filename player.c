@@ -19,6 +19,11 @@
 int currentBullets = MAX_BULLETS;
 bool isReloading = false;
 float reloadTimer = 0.0f;
+extern bool coletaveisinicializados;
+extern Object obstaculos[NUM_OBSTACULOS_REC];
+extern Circle cadeiras[4]; //declarei aqui pra ele poder usar da main
+extern Polygon poligonos[2];
+extern Coletavel coletaveis[NUM_COLETAVEIS];
 
 double getPlayerRotation(Player *player);
 
@@ -266,17 +271,13 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
 
 void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG){
     float delta = GetFrameTime();
-
-    Object obstaculos[NUM_OBSTACULOS_REC];
-    Circle cadeiras[4];
-    Polygon poligonos[2];
-    Coletavel coletaveis[NUM_COLETAVEIS];
-
+ 
+    if (!coletaveisinicializados){ //booleano para garantir que ele gere os coletaveis uma vez 
     InicializarObstaculos(obstaculos);
     InicializarCadeiras(cadeiras);
     InicializarPoligonos(poligonos);
     InicializarColetaveis(coletaveis, obstaculos, cadeiras, poligonos);
-
+    coletaveisinicializados = true;}
     // Atualiza posição do jogador
     getPlayerPos(player, delta, PLAYER_SPEED, obstaculos, cadeiras, poligonos, coletaveis);
 

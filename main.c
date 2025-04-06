@@ -3,9 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #define BASE_WIDTH 1280
 #define BASE_HEIGHT 720
 #define PLAYER_SPEED 200.0f
+
+bool coletaveisinicializados;
+Object obstaculos[NUM_OBSTACULOS_REC];
+Circle cadeiras[4]; //tive que declarar fora de player_main 
+Polygon poligonos[2];
+Coletavel coletaveis[NUM_COLETAVEIS];
+
 
 Resolution resolutions[] = {
     {1280, 720},
@@ -35,11 +43,13 @@ int main(void)
     int letterCount = 0;
     int framesCounter = 0;
     int velocidade = 4;
+    
 
     Texture2D spriteSheet = LoadTexture("imagens//boneco.png");
     Texture2D bulletTexture = LoadTexture("imagens//bullet.png");
     Texture2D phaseOneBG = LoadTexture("imagens/lotus_lounge_bar.png");
     Player player = InitPlayer(spriteSheet, (Vector2){BASE_WIDTH / 2, BASE_HEIGHT / 2}, PLAYER_SPEED);
+
 
     while (!WindowShouldClose())
     {   
