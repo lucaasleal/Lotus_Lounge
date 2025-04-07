@@ -101,6 +101,9 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
         DrawRectangle(screenWidth / 4, screenHeight / 4, screenWidth / 2, screenHeight / 2, BLACK);
         DrawText("Controles do Jogo", screenWidth / 2 - 100 * scaleX, screenHeight / 4 + 20 * scaleY, 30 * scaleY, GRAY);
         DrawText("\nF - Tela Cheia", screenWidth / 4 + 20 * scaleX, screenHeight / 4 + 50 * scaleY, 20 * scaleY, WHITE);
+        DrawText("\nW, A, S, D - Mover", screenWidth / 4 + 20 * scaleX, screenHeight / 4 + 75 * scaleY, 20 * scaleY, WHITE);
+        DrawText("\nMouse - Mirar", screenWidth / 4 + 20 * scaleX, screenHeight / 4 + 100 * scaleY, 20 * scaleY, WHITE);
+        DrawText("\nClique esquerdo - Atirar", screenWidth / 4 + 20 * scaleX, screenHeight / 4 + 125 * scaleY, 20 * scaleY, WHITE);
         
         Rectangle btnBack = {screenWidth / 2 - btnWidth / 2, screenHeight / 4 + screenHeight / 2 - btnHeight - 20 * scaleY, btnWidth, btnHeight};
         DrawRectangleRec(btnBack, DARKGRAY);
