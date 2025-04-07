@@ -15,6 +15,7 @@ typedef struct Player {
     int frame;
     float timer;
     int direction; // 0 = Baixo, 1 = Esquerda, 2 = Direita, 3 = Cima
+    int life;
 } Player;
 
 typedef struct Object {
@@ -39,15 +40,28 @@ typedef struct {
     int pointCount;
 } Polygon;
 
+typedef struct Bullet {
+    Vector2 position;
+    Vector2 velocity;
+    bool active;
+} Bullet;
+
 
 void FPS_visor();
 void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, int numResolutions, Resolution *resolutions, int *selectedResolution, bool *init);
 void text_board(int *framesCounter, int *letterCount, int *velocidade);
 Player InitPlayer(Texture2D texture, Vector2 position, float PLAYER_SPEED);
-void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG);
+void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture, Rectangle spawnZones[]);
 
+
+void InicializarObstaculos(Object obstaculos[]);
+void InicializarCadeiras(Circle cadeiras[]);
+void InicializarPoligonos(Polygon poligonos[]);
+void InicializarColetaveis(Coletavel coletaveis[], Object obstaculos[], Circle cadeiras[], Polygon poligonos[]);
+int CheckCollisionRecPoly(Rectangle Rec, Polygon poly);
 
 #include "menu.c"
 #include "game.c"
 #include "player.c"
+#include "phaseOne.c"
 #endif

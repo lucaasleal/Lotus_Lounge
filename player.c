@@ -13,7 +13,7 @@
 
 #define MAX_BULLETS 20
 #define RELOAD_TIME 2.0f // em segundos
-#define NUM_COLETAVEIS 10
+#define NUM_COLETAVEIS 5
 #define NUM_OBSTACULOS_REC 10
 
 int currentBullets = MAX_BULLETS;
@@ -25,115 +25,102 @@ extern Circle cadeiras[4]; //declarei aqui pra ele poder usar da main
 extern Polygon poligonos[2];
 extern Coletavel coletaveis[NUM_COLETAVEIS];
 
-double getPlayerRotation(Player *player);
-
-// Estrutura do projétil
-typedef struct Bullet {
-    Vector2 position;
-    Vector2 velocity;
-    bool active;
-} Bullet;
 Bullet bullets[MAX_BULLETS];
 
+typedef struct zombie {
+    Vector2 position;
+    Rectangle hitbox;
+    Texture2D texture;
+    float speed;
+    float life;
+    int direction;
+    bool alive;
+} Zombie;
+
+float GetDistance(Vector2 a, Vector2 b) {
+    return sqrtf((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y));
+}
+
+Zombie* initZombie(int numZombies) {
+    Zombie *zombie = (Zombie*)malloc(numZombies * sizeof(Zombie));
+    for(int i = 0; i < numZombies; i++) {
+        zombie[i].position = (Vector2){0, 0};
+        zombie[i].hitbox = (Rectangle){0, 0, 50, 50}; // Tamanho do zumbi
+        zombie[i].texture = LoadTexture("imagens//zombie.jpeg");
+        zombie[i].speed = 100.0f;
+        zombie[i].life = 100.0f;
+        zombie[i].alive = false;
+    }
+    return zombie;
+}
+
+Zombie generateZombie(Zombie zombie[], Rectangle *spawnzones, int numSpawns, int numZombies, int maxZombies) {
+    for(int i = 0;i < maxZombies; ++i) {
+        if((zombie)[i].alive == false && rand() % 100 < 5) { // 5% chance de gerar um novo zumbi
+            int spawnIndex = rand() % numSpawns;
+            (zombie)[i].position.x = GetRandomValue(spawnzones[spawnIndex].x, spawnzones[spawnIndex].x + spawnzones[spawnIndex].width);
+            (zombie)[i].position.y = GetRandomValue(spawnzones[spawnIndex].y, spawnzones[spawnIndex].y + spawnzones[spawnIndex].height);
+            (zombie)[i].hitbox = (Rectangle){(zombie)[i].position.x, (zombie)[i].position.y, 50, 50}; // Tamanho do zumbi
+            (zombie)[i].texture = LoadTexture("imagens//zombie.jpeg");
+            (zombie)[i].speed = 100.0f;
+            (zombie)[i].life = 100.0f;
+            (zombie)[i].alive = true;
+        }
+    }
+}
+
+void controlZombie(Zombie *zombie, Player *player, Rectangle player_hitbox, float delta, int maxZombies) {
+    for(int i = 0; i < MAX_BULLETS; i++) {
+        if (bullets[i].active) {
+            for(int j = 0; j < MAX_BULLETS; j++) {
+                if (CheckCollisionRecs(zombie[j].hitbox, (Rectangle){bullets[i].position.x, bullets[i].position.y, 20, 20})) {
+                    zombie[j].life -= 10.0f; // Dano do zumbi
+                    bullets[i].active = false; // Desativa a bala
+                    if (zombie[j].life <= 0) {
+                        zombie[j].alive = false; // Zumbi morre
+                    }
+                }
+            }
+        }
+    }
+
+   for(int i = 0; i < maxZombies; i++) {
+        if(zombie[i].alive) {
+            Vector2 direction = {player->position.x - zombie[i].position.x, player->position.y - zombie[i].position.y};
+            float length = GetDistance(direction, (Vector2){0, 0});
+            if (length > 0) {
+                direction.x /= length;
+                direction.y /= length;
+            }
+            if(CheckCollisionRecs(zombie[i].hitbox, player_hitbox)) {
+                player->life -= 1.0f; // Dano do zumbi
+            }
+            zombie[i].position.x += direction.x * zombie[i].speed * delta;
+            zombie[i].position.y += direction.y * zombie[i].speed * delta;
+        }
+    }
+}
+
+void drawZombie(Zombie *zombie, int zombieCount) {
+    for(int i = 0; i < zombieCount; i++) {
+        if (zombie[i].alive) {
+            Rectangle source = {0, 0, (float)zombie[i].texture.width, (float)zombie[i].texture.height};
+            Rectangle dest = {zombie[i].position.x, zombie[i].position.y, (float)zombie[i].texture.width * 0.5f, (float)zombie[i].texture.height * 0.5f};
+            Vector2 origin = {(dest.width / 2), (dest.height / 2)};
+            DrawTexturePro(zombie[i].texture, source, dest, origin, 0.0f, WHITE);
+        }
+    }
+}
+
+
+double getPlayerRotation(Player *player);
+// Estrutura do projétil
+
 Player InitPlayer(Texture2D texture, Vector2 position, float PLAYER_SPEED) {
-    Player player = {position, PLAYER_SPEED, texture, 0, 0.0f, 0};
+    Player player = {position, PLAYER_SPEED, texture, 0, 0.0f, 0, 100};
     return player;
 }
 
-void InicializarObstaculos(Object obstaculos[]) {
-    // Definição de obstáculos (paredes, bar, mesa de sinuca, etc.)
-    obstaculos[0] = (Object){{0, 0, 204, 720},1,RED};       // Parede esquerda
-    obstaculos[1] = (Object){{1076, 0, 204, 720},1,RED};    // Parede direita
-    obstaculos[2] = (Object){{0, 0, 1280, 47},1,RED};       // Parede superior
-    obstaculos[3] = (Object){{0, 652, 1280, 47},1,RED};     // Parede inferior
-    obstaculos[4] = (Object){{204, 47, 734, 221},1,RED};    // Mesa do bar
-    obstaculos[5] = (Object){{952, 47, 114, 11}, 1, RED};   // Porta
-    obstaculos[6] = (Object){{288, 641, 114, 11}, 1, RED};  // Janela 1
-    obstaculos[7] = (Object){{490, 641, 114, 11}, 1, RED};  // Janela 2
-    obstaculos[8] = (Object){{686, 641, 114, 11}, 1, RED};  // Janela 3
-    obstaculos[9] = (Object){{872, 641, 114, 11}, 1, RED};  // Porta 2
-}
-
-void InicializarCadeiras(Circle cadeiras[]) {
-    cadeiras[0] = (Circle){{365, 312},20};
-    cadeiras[1] = (Circle){{428, 300},20};
-    cadeiras[2] = (Circle){{630, 305},20};
-    cadeiras[3] = (Circle){{700, 305},20};
-}
-
-void InicializarPoligonos(Polygon poligonos[]) {
-    for (int i = 0; i < 2; i++){
-        poligonos[i].points = malloc(4 * sizeof(Vector2));
-        poligonos[i].pointCount = 4;
-    }
-
-    // Mesa do bar
-    poligonos[0].points[0] = (Vector2){798, 384};
-    poligonos[0].points[1] = (Vector2){992, 415};
-    poligonos[0].points[2] = (Vector2){971, 536};
-    poligonos[0].points[3] = (Vector2){778, 504};
-
-    // Jukebox
-    poligonos[1].points[0] = (Vector2){214, 299};
-    poligonos[1].points[1] = (Vector2){291, 276};
-    poligonos[1].points[2] = (Vector2){305, 327};
-    poligonos[1].points[3] = (Vector2){227, 350};
-}
-
-int CheckCollisionRecPoly(Rectangle Rec, Polygon poly){
-    Vector2 pontosRec[4] = {
-        {Rec.x, Rec.y},
-        {Rec.x + Rec.width, Rec.y},
-        {Rec.x, Rec.y + Rec.height},
-        {Rec.x + Rec.width, Rec.y + Rec.height}
-    };
-
-    for (int i = 0; i < 4; i++){
-        if (CheckCollisionPointPoly(pontosRec[i], poly.points, poly.pointCount)){
-            return 1;
-        }
-    }
-    return 0;
-}
-
-void InicializarColetaveis(Coletavel coletaveis[], Object obstaculos[], Circle cadeiras[], Polygon poligonos[]) {
-    srand(time(NULL)); // Gerar números aleatórios
-    for (int i = 0; i < NUM_COLETAVEIS; i++){ 
-        bool posicaoValida = false;
-        while(!posicaoValida){ //verificação para que os coletáveis não aparecam em lugares impróprios 
-            coletaveis[i].posicao.x = GetRandomValue(200, 1070);
-            coletaveis[i].posicao.y = GetRandomValue(45, 650);
-            coletaveis[i].coletado = false;
-
-            Rectangle novoColetavel = {coletaveis[i].posicao.x, coletaveis[i].posicao.y, 20, 20};
-            posicaoValida = true;
-
-            //coletaveis nao aparecer em cima dos retangulos:
-            for (int j = 0; j < NUM_OBSTACULOS_REC; j++){
-                if (CheckCollisionRecs(novoColetavel, obstaculos[j].rect)){
-                    posicaoValida = false;
-                    break;
-                }
-            }
-
-            //coletaveis nao aparecer em cima das cadeiras
-            for (int j = 0; j < 4; j++){
-                if (CheckCollisionCircleRec(cadeiras[j].center, cadeiras[j].radius, novoColetavel)) {
-                    posicaoValida = false;
-                    break;
-                }
-            }
-
-            //coletaveis nao aparecer em cima dos poligonos 
-            for (int j = 0; j < 2; j++) {
-                if (CheckCollisionRecPoly(novoColetavel, poligonos[j])) {
-                    posicaoValida = false;
-                    break;
-                }
-            }
-        }
-    }
-}
 
 // Função para atirar
 void ShootBullet(Player *player) {
@@ -269,9 +256,21 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
     DrawTexturePro(player.texture, source, dest, origin, rotation, WHITE);
 }
 
-void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG){
+void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture, Rectangle spawnZones[]) {
     float delta = GetFrameTime();
- 
+    //Zombie* zombie = NULL; // Array de zumbis
+    //zombie = initZombie(2); // Inicializa os zumbis
+    Zombie zombie[2] = {
+        {{0, 0}, {0, 0, 50, 50}, {0}, 100.0f, 100.0f, 0, false},
+        {{0, 0}, {0, 0, 50, 50}, {0}, 100.0f, 100.0f, 0, false}
+        };
+    if(zombie == NULL) {
+        exit(1);// Inicializa o array de zumbis
+    }
+    int zombieCount = 2; // Número máximo de zumbis
+    generateZombie(zombie, spawnZones, 5, zombieCount, zombieCount); // Gera zumbis em spawnzones
+    controlZombie(zombie, player, (Rectangle){player->position.x, player->position.y, 50, 50}, delta, 10); // Controla os zumbis
+
     if (!coletaveisinicializados){ //booleano para garantir que ele gere os coletaveis uma vez 
     InicializarObstaculos(obstaculos);
     InicializarCadeiras(cadeiras);
@@ -311,6 +310,8 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     DrawPlayer(*player, PLAYER_SPEED);
     FPS_visor();
 
+    drawZombie(zombie, zombieCount); // Desenha os zumbis
+
     // Desenha os projéteis
     DrawBullets(bulletTexture);
 
@@ -322,9 +323,17 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
 
     for (int i = 0; i < NUM_COLETAVEIS; i++) {
         if (!coletaveis[i].coletado) {
-            DrawRectangleV(coletaveis[i].posicao, (Vector2){20, 20}, RED);
+            float scale = 0.07f;
+            Rectangle source = {0, 0, (float)bottleTexture.width, (float)bottleTexture.height};
+            Rectangle dest = {
+                coletaveis[i].posicao.x,
+                coletaveis[i].posicao.y,
+                bottleTexture.width * scale,
+                bottleTexture.height * scale
+            };
+            Vector2 origin = {dest.width / 2, dest.height / 2};
+            DrawTexturePro(bottleTexture, source, dest, origin, 0, WHITE);
         }
     }
-
     EndDrawing();
 }

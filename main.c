@@ -48,7 +48,15 @@ int main(void)
     Texture2D spriteSheet = LoadTexture("imagens//boneco.png");
     Texture2D bulletTexture = LoadTexture("imagens//bullet.png");
     Texture2D phaseOneBG = LoadTexture("imagens/lotus_lounge_bar.png");
+    Texture2D bottleTexture = LoadTexture("imagens//bottle.png");
     Player player = InitPlayer(spriteSheet, (Vector2){BASE_WIDTH / 2, BASE_HEIGHT / 2}, PLAYER_SPEED);
+
+    Rectangle spawnZones[5];
+    spawnZones[0] = (Rectangle){50, 50, 100, 100};   // canto superior esquerdo
+    spawnZones[1] = (Rectangle){700, 50, 100, 100};  // canto superior direito
+    spawnZones[2] = (Rectangle){50, 500, 100, 100};  // canto inferior esquerdo
+    spawnZones[3] = (Rectangle){700, 500, 100, 100}; // canto inferior direito
+    spawnZones[4] = (Rectangle){ BASE_HEIGHT/2, BASE_WIDTH/2, 450, 350}; // centro
 
 
     while (!WindowShouldClose())
@@ -66,7 +74,7 @@ int main(void)
         }
         if (init){
             SetMusicVolume(Music_Lobby, 1.0f);
-            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG);
+            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG, bottleTexture, spawnZones);
         } else {
             SetMusicVolume(Music_Lobby, 0.5f);
             Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, numResolutions, resolutions, &selectedResolution, &init);
