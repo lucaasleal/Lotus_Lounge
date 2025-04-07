@@ -41,78 +41,6 @@ float GetDistance(Vector2 a, Vector2 b) {
     return sqrtf((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y));
 }
 
-Zombie* initZombie(int numZombies) {
-    Zombie *zombie = (Zombie*)malloc(numZombies * sizeof(Zombie));
-    for(int i = 0; i < numZombies; i++) {
-        zombie[i].position = (Vector2){0, 0};
-        zombie[i].hitbox = (Rectangle){0, 0, 50, 50}; // Tamanho do zumbi
-        zombie[i].texture = LoadTexture("imagens//zombie.jpeg");
-        zombie[i].speed = 100.0f;
-        zombie[i].life = 100.0f;
-        zombie[i].alive = false;
-    }
-    return zombie;
-}
-
-Zombie generateZombie(Zombie zombie[], Rectangle *spawnzones, int numSpawns, int numZombies, int maxZombies) {
-    for(int i = 0;i < maxZombies; ++i) {
-        if((zombie)[i].alive == false && rand() % 100 < 5) { // 5% chance de gerar um novo zumbi
-            int spawnIndex = rand() % numSpawns;
-            (zombie)[i].position.x = GetRandomValue(spawnzones[spawnIndex].x, spawnzones[spawnIndex].x + spawnzones[spawnIndex].width);
-            (zombie)[i].position.y = GetRandomValue(spawnzones[spawnIndex].y, spawnzones[spawnIndex].y + spawnzones[spawnIndex].height);
-            (zombie)[i].hitbox = (Rectangle){(zombie)[i].position.x, (zombie)[i].position.y, 50, 50}; // Tamanho do zumbi
-            (zombie)[i].texture = LoadTexture("imagens//zombie.jpeg");
-            (zombie)[i].speed = 100.0f;
-            (zombie)[i].life = 100.0f;
-            (zombie)[i].alive = true;
-        }
-    }
-}
-
-void controlZombie(Zombie *zombie, Player *player, Rectangle player_hitbox, float delta, int maxZombies) {
-    for(int i = 0; i < MAX_BULLETS; i++) {
-        if (bullets[i].active) {
-            for(int j = 0; j < MAX_BULLETS; j++) {
-                if (CheckCollisionRecs(zombie[j].hitbox, (Rectangle){bullets[i].position.x, bullets[i].position.y, 20, 20})) {
-                    zombie[j].life -= 10.0f; // Dano do zumbi
-                    bullets[i].active = false; // Desativa a bala
-                    if (zombie[j].life <= 0) {
-                        zombie[j].alive = false; // Zumbi morre
-                    }
-                }
-            }
-        }
-    }
-
-   for(int i = 0; i < maxZombies; i++) {
-        if(zombie[i].alive) {
-            Vector2 direction = {player->position.x - zombie[i].position.x, player->position.y - zombie[i].position.y};
-            float length = GetDistance(direction, (Vector2){0, 0});
-            if (length > 0) {
-                direction.x /= length;
-                direction.y /= length;
-            }
-            if(CheckCollisionRecs(zombie[i].hitbox, player_hitbox)) {
-                player->life -= 1.0f; // Dano do zumbi
-            }
-            zombie[i].position.x += direction.x * zombie[i].speed * delta;
-            zombie[i].position.y += direction.y * zombie[i].speed * delta;
-        }
-    }
-}
-
-void drawZombie(Zombie *zombie, int zombieCount) {
-    for(int i = 0; i < zombieCount; i++) {
-        if (zombie[i].alive) {
-            Rectangle source = {0, 0, (float)zombie[i].texture.width, (float)zombie[i].texture.height};
-            Rectangle dest = {zombie[i].position.x, zombie[i].position.y, (float)zombie[i].texture.width * 0.5f, (float)zombie[i].texture.height * 0.5f};
-            Vector2 origin = {(dest.width / 2), (dest.height / 2)};
-            DrawTexturePro(zombie[i].texture, source, dest, origin, 0.0f, WHITE);
-        }
-    }
-}
-
-
 double getPlayerRotation(Player *player);
 // Estrutura do projétil
 
@@ -146,10 +74,11 @@ void UpdateBullets(float delta) {
             bullets[i].position.y += bullets[i].velocity.y * delta;
 
             // Se sair da tela, desativa
-            if (bullets[i].position.x < 0 || bullets[i].position.x > GetScreenWidth() ||
-                bullets[i].position.y < 0 || bullets[i].position.y > GetScreenHeight()) {
+            if (bullets[i].position.x < 204 || bullets[i].position.x > 1074 ||
+                bullets[i].position.y < 50 || bullets[i].position.y > 650) {
                 bullets[i].active = false;
             }
+
         }
     }
 }
@@ -239,10 +168,10 @@ double getPlayerRotation(Player *player) {
 
 void DrawPlayer(Player player, float PLAYER_SPEED) {
     int frameWidth = player.texture.width / 4;   // Assumindo 4 colunas na spritesheet
-    int frameHeight = player.texture.height / 4; // Assumindo 4 linhas na spritesheet
+    int frameHeight = player.texture.height; // Assumindo 4 linhas na spritesheet
     Rectangle source = {frameWidth * player.frame, frameHeight * player.direction, frameWidth, frameHeight};
 
-    float scale = 0.5; // Reduz tamanho do sprite para caber melhor no retângulo
+    float scale = 1.5; // Reduz tamanho do sprite para caber melhor no retângulo
     Rectangle dest = {
         player.position.x + 24,  // Centraliza o sprite dentro do retângulo (50x50)
         player.position.y + 24,
@@ -258,18 +187,7 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
 
 void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture, Rectangle spawnZones[]) {
     float delta = GetFrameTime();
-    //Zombie* zombie = NULL; // Array de zumbis
-    //zombie = initZombie(2); // Inicializa os zumbis
-    Zombie zombie[2] = {
-        {{0, 0}, {0, 0, 50, 50}, {0}, 100.0f, 100.0f, 0, false},
-        {{0, 0}, {0, 0, 50, 50}, {0}, 100.0f, 100.0f, 0, false}
-        };
-    if(zombie == NULL) {
-        exit(1);// Inicializa o array de zumbis
-    }
-    int zombieCount = 2; // Número máximo de zumbis
-    generateZombie(zombie, spawnZones, 5, zombieCount, zombieCount); // Gera zumbis em spawnzones
-    controlZombie(zombie, player, (Rectangle){player->position.x, player->position.y, 50, 50}, delta, 10); // Controla os zumbis
+    
 
     if (!coletaveisinicializados){ //booleano para garantir que ele gere os coletaveis uma vez 
     InicializarObstaculos(obstaculos);
@@ -306,12 +224,11 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     // Desenho da cena
     BeginDrawing();
     ClearBackground(BLACK);
-    DrawTexture(phaseOneBG, 0, 0, WHITE);
+    Vector2 mouse = GetMousePosition();
+    DrawTexture(phaseOneBG, 20, 0, WHITE);
     DrawPlayer(*player, PLAYER_SPEED);
     FPS_visor();
-
-    drawZombie(zombie, zombieCount); // Desenha os zumbis
-
+    DrawText(TextFormat("Mouse X: %.0f Y: %.0f", mouse.x, mouse.y), 300, 10, 20, WHITE);
     // Desenha os projéteis
     DrawBullets(bulletTexture);
 

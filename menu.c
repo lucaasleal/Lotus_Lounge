@@ -10,7 +10,7 @@ void FPS_visor() {
     DrawText(fpsText, 15, 10, 20, WHITE);
 }
 
-void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, int numResolutions, Resolution *resolutions, int *selectedResolution, bool *init) {
+void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, bool *init) {
     // Comentei isso porque tava bugando o som
     //BeginDrawing();
     //ClearBackground(RAYWHITE);
@@ -94,23 +94,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
     
     if (*showSettings) {
         DrawRectangle(screenWidth / 4, screenHeight / 4, screenWidth / 2, screenHeight / 2, BLACK);
-        DrawText("Escolha a Resolução\n", screenWidth / 2 - 150 * scaleX, screenHeight / 4 + 20 * scaleY, 30 * scaleY, DARKGRAY);
-
-        for (int i = 0; i < numResolutions; i++) {
-            Rectangle btnResolution = {screenWidth / 2 - btnWidth / 2, screenHeight / 4 + 50 * scaleY + (i * (btnHeight + 10 * scaleY)), btnWidth, btnHeight};
-            DrawRectangleRec(btnResolution, DARKGRAY);
-            char resolutionText[32];
-            snprintf(resolutionText, sizeof(resolutionText), "%dx%d", resolutions[i].width, resolutions[i].height);
-            DrawText(resolutionText, btnResolution.x + btnWidth / 4, btnResolution.y + btnHeight / 4, fontSize / 2, WHITE);
-
-            if (CheckCollisionPointRec(mousePos, btnResolution) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                *selectedResolution = i;
-                if (*isFullscreen) ToggleFullscreen();
-                SetWindowSize(resolutions[*selectedResolution].width, resolutions[*selectedResolution].height);
-                if (*isFullscreen) ToggleFullscreen();
-                *showSettings = false;
-            }
-        }
+        DrawText("LOTUS LOUNGE ©\n", screenWidth / 2 - 150 * scaleX, screenHeight / 4 + 20 * scaleY, 30 * scaleY, DARKGRAY);
     }
     
     if (*showControls) {
