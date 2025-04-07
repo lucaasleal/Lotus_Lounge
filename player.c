@@ -56,7 +56,7 @@ void ShootBullet(Player *player) {
 
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (!bullets[i].active) {
-            bullets[i].position = (Vector2){player->position.x + 25, player->position.y + 25}; // centro do boneco
+            bullets[i].position = (Vector2){player->position.x+25, player->position.y+25}; // centro do boneco
             float angle = (getPlayerRotation(player)  - 90.0f)* (PI / 180.0f);
             bullets[i].velocity = (Vector2){cosf(angle) * 500, sinf(angle) * 500}; // velocidade
             bullets[i].active = true;
@@ -89,7 +89,7 @@ void DrawBullets(Texture2D bulletTexture) {
         if (bullets[i].active) {
             float rotation = atan2f(bullets[i].velocity.y, bullets[i].velocity.x) * 180.0f / PI;
             // Tamanho da bala na tela
-            float scale = 0.025f;
+            float scale = 0.02f;
             Rectangle source = {0, 0, (float)bulletTexture.width, (float)bulletTexture.height};
             Rectangle dest = {
                 bullets[i].position.x,
@@ -167,7 +167,7 @@ double getPlayerRotation(Player *player) {
 }
 
 void DrawPlayer(Player player, float PLAYER_SPEED) {
-    int frameWidth = player.texture.width / 4;   // Assumindo 4 colunas na spritesheet
+    int frameWidth = player.texture.width / 9;   // Assumindo 4 colunas na spritesheet
     int frameHeight = player.texture.height; // Assumindo 4 linhas na spritesheet
     Rectangle source = {frameWidth * player.frame, frameHeight * player.direction, frameWidth, frameHeight};
 
@@ -226,11 +226,11 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     ClearBackground(BLACK);
     Vector2 mouse = GetMousePosition();
     DrawTexture(phaseOneBG, 20, 0, WHITE);
+    // Desenha os projéteis
+    DrawBullets(bulletTexture);
     DrawPlayer(*player, PLAYER_SPEED);
     FPS_visor();
     DrawText(TextFormat("Mouse X: %.0f Y: %.0f", mouse.x, mouse.y), 300, 10, 20, WHITE);
-    // Desenha os projéteis
-    DrawBullets(bulletTexture);
 
     //Mostra Nº de Balas
     DrawText(TextFormat("Balas: %d/%d", currentBullets, MAX_BULLETS), WIDTH-160, HEIGHT-90, 20, WHITE);
