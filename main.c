@@ -12,10 +12,22 @@ int main(void)
     InitWindow(BASE_WIDTH, BASE_HEIGHT, "Lotus Lounge");  
     SetAudioStreamBufferSizeDefault(1024);
     InitAudioDevice();
+    InitPlayerSounds();  // Carrega os efeitos sonoros (tiro e recarregamento)
     SetTargetFPS(60);
     
-    Music Music_Lobby = LoadMusicStream(".\\assets\\OCD\\Twilight_Zone.ogg");
-    PlayMusicStream(Music_Lobby);
+    // === CARREGAMENTO DAS MÚSICAS ===
+    Music musicMenu = LoadMusicStream("assets/OCD/musica_menu.ogg");
+    Music musicFase1 = LoadMusicStream("assets/OCD/Twilight_Zone.ogg");
+    Music musicFase2 = LoadMusicStream("assets/OCD/musica_fase_2.ogg");
+
+    SetMusicVolume(musicMenu, 1.0f);
+    SetMusicVolume(musicFase1, 1.0f);
+    SetMusicVolume(musicFase2, 1.0f);
+    
+    PlayMusicStream(musicMenu);  // Começa no menu
+    
+    Sound shotSound = LoadSound("assets/OCD/shot.ogg");
+    Sound reloadSound = LoadSound("assets/OCD/reload.ogg");
 
     // Variáveis para controle de estado
     bool isFullscreen = false;
@@ -23,6 +35,7 @@ int main(void)
     bool showControls = false; // Mostrar tela de controles
     bool showCredit = false;
     bool init = false;
+    int currentMusic = 0;       // 0 = menu, 1 = fase 1, 2 = fase 2
 
     Texture2D spriteSheet = LoadTexture("assets//imagens//player.png");
     Texture2D bulletTexture = LoadTexture("assets//imagens//bullet.png");
@@ -32,7 +45,30 @@ int main(void)
 
     while (!WindowShouldClose())
     {   
-        UpdateMusicStream(Music_Lobby);
+        // Atualiza as músicas
+        UpdateMusicStream(musicMenu);
+        UpdateMusicStream(musicFase1);
+        UpdateMusicStream(musicFase2);
+        
+        // Lógica de troca de música
+        if (!init && currentMusic != 0) {
+            StopMusicStream(musicFase1);
+            StopMusicStream(musicFase2);
+            if (!IsMusicStreamPlaying(musicMenu)) PlayMusicStream(musicMenu);
+            currentMusic = 0;
+        } 
+        else if (init && level == 1 && currentMusic != 1) {
+            StopMusicStream(musicMenu);
+            StopMusicStream(musicFase2);
+            if (!IsMusicStreamPlaying(musicFase1)) PlayMusicStream(musicFase1);
+            currentMusic = 1;
+        } 
+        else if (init && level == 2 && currentMusic != 2) {
+            StopMusicStream(musicMenu);
+            StopMusicStream(musicFase1);
+            if (!IsMusicStreamPlaying(musicFase2)) PlayMusicStream(musicFase2);
+            currentMusic = 2;
+        }
         if (!player.texture.id) {
             printf("Erro: Player não inicializado corretamente!\n");
             CloseAudioDevice();
@@ -51,7 +87,11 @@ int main(void)
             Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, &init);
         }
     }
-    UnloadMusicStream(Music_Lobby);
+    // Liberação dos recursos
+    UnloadPlayerSounds();  // Libera os efeitos de som
+    UnloadMusicStream(musicMenu);
+    UnloadMusicStream(musicFase1);
+    UnloadMusicStream(musicFase2);
     CloseAudioDevice();
     CloseWindow();
     return 0;
