@@ -16,6 +16,9 @@
 #define NUM_COLETAVEIS 5
 #define NUM_OBSTACULOS_REC 10
 
+Sound shotSound;
+Sound reloadSound;
+
 int currentBullets = MAX_BULLETS;
 bool isReloading = false;
 float reloadTimer = 0.0f;
@@ -28,6 +31,11 @@ extern Coletavel coletaveis[NUM_COLETAVEIS];
 Bullet bullets[MAX_BULLETS];
 Zombie zombies[100];
 
+// Função que inicializa sons
+void InitPlayerSounds() {
+    shotSound = LoadSound("assets/OCD/shot.ogg");
+    reloadSound = LoadSound("assets/OCD/reload.ogg");
+}
 void InitZombies(Zombie zombies[], int numZombies) {
     for (int i = 0; i < numZombies; i++) {
         zombies[i].alive = false;
@@ -159,6 +167,7 @@ void ShootBullet(Player *player) {
 
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (!bullets[i].active) {
+            PlaySound(shotSound);
             bullets[i].position = (Vector2){player->position.x+25, player->position.y+25}; // centro do boneco
             float angle = (getPlayerRotation(player)  - 90.0f)* (PI / 180.0f);
             bullets[i].velocity = (Vector2){cosf(angle) * 1000, sinf(angle) * 1000}; // velocidade
@@ -338,6 +347,7 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
             currentBullets = MAX_BULLETS;
             isReloading = false;
             reloadTimer = 0.0f;
+            PlaySound(reloadSound);
         }
     }
 
@@ -398,4 +408,9 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
         }
     }
     EndDrawing();
+}
+
+void UnloadPlayerSounds() {
+    UnloadSound(shotSound);
+    UnloadSound(reloadSound);
 }
