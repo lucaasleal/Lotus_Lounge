@@ -6,7 +6,7 @@
 
 #define BASE_WIDTH 1280
 #define BASE_HEIGHT 720
-#define PLAYER_SPEED 200.0f
+#define PLAYER_SPEED 100.0f
 
 bool coletaveisinicializados;
 Object obstaculos[NUM_OBSTACULOS_REC];
@@ -31,7 +31,6 @@ int main(void)
     bool showSettings = false;
     bool showControls = false; // Mostrar tela de controles
     bool showCredit = false;
-    int selectedResolution = 1; // Índice da resolução atual (1920x1080)
     bool init = 0;
 
     Texture2D spriteSheet = LoadTexture("assets//imagens//player.png");
@@ -39,14 +38,6 @@ int main(void)
     Texture2D phaseOneBG = LoadTexture("assets//imagens//lotus_lounge_bar.png");
     Texture2D bottleTexture = LoadTexture("assets//imagens//bottle.png");
     Player player = InitPlayer(spriteSheet, (Vector2){BASE_WIDTH / 2, BASE_HEIGHT / 2}, PLAYER_SPEED);
-
-    Rectangle spawnZones[5];
-    spawnZones[0] = (Rectangle){50, 50, 100, 100};   // canto superior esquerdo
-    spawnZones[1] = (Rectangle){700, 50, 100, 100};  // canto superior direito
-    spawnZones[2] = (Rectangle){50, 500, 100, 100};  // canto inferior esquerdo
-    spawnZones[3] = (Rectangle){700, 500, 100, 100}; // canto inferior direito
-    spawnZones[4] = (Rectangle){ BASE_HEIGHT/2, BASE_WIDTH/2, 450, 350}; // centro
-
 
     while (!WindowShouldClose())
     {   

@@ -26,13 +26,15 @@ extern Polygon poligonos[2];
 extern Coletavel coletaveis[NUM_COLETAVEIS];
 
 Bullet bullets[MAX_BULLETS];
-Zombie zombies[2];
+Zombie zombies[100];
 
 void InitZombies(Zombie zombies[], int numZombies) {
     for (int i = 0; i < numZombies; i++) {
         zombies[i].alive = false;
         zombies[i].hitbox = (Rectangle){0, 0, 50, 50};
-        zombies[i].texture = LoadTexture("imagens//zombie.png");
+        zombies[i].texture = LoadTexture("zumbi.png");
+        zombies[i].frame = 0;
+        zombies[i].timer = 0.0f;
     }
 }
 
@@ -44,7 +46,7 @@ void SpawnZombies(Zombie zombies[], int numZombies, Rectangle spawnZones[], int 
             zombies[i].position.y = spawnZones[spawnZoneIndex].y + GetRandomValue(0, (int)(spawnZones[spawnZoneIndex].height - 50));
             zombies[i].alive = true;
             zombies[i].life = 100.0f + GetRandomValue(-20, 50);
-            zombies[i].speed = 50.0f + GetRandomValue(-20, 20);
+            zombies[i].speed = 50.0f + GetRandomValue(0, 20);
         }
     }
 }
@@ -79,6 +81,12 @@ void ControlZombies(Zombie *zombie, Player *player, float delta, Object obstacul
                 // Atualiza a hitbox do zumbi
                 zombie->hitbox.x = zombie->position.x;
                 zombie->hitbox.y = zombie->position.y;
+                
+                zombie->timer += delta;
+                if (zombie->timer >= 0.1f) {
+                    zombie->frame = (zombie->frame + 1) % 9; // supondo 9 frames
+                    zombie->timer = 0;
+                }
             } else {
                 player->life -= 0.1f; // Dano ao jogador se o zumbi colidir
             }            
@@ -96,11 +104,38 @@ void CheckBulletCollision(Zombie *zombie, Bullet *bullet) {
     }
 }
 
-void DrawZombies(Zombie zombies[], int numZombies) {
+void DrawZombies(Zombie zombies[], int numZombies, Player *player) {
     for (int i = 0; i < numZombies; i++) {
         if (zombies[i].alive) {
-            // draw a box for debbugging
-            DrawRectangle(zombies[i].hitbox.x, zombies[i].hitbox.y, zombies[i].hitbox.width, zombies[i].hitbox.height, RED);
+            int frameWidth = zombies[i].texture.width / 3;  // 3 frames por linha
+            int frameHeight = zombies[i].texture.height; // 4 direções
+
+            Rectangle source = {
+                frameWidth * zombies[i].frame,
+                frameHeight * zombies[i].direction,
+                frameWidth,
+                frameHeight
+            };
+
+            float scale = 2.5f;
+            Rectangle dest = {
+                zombies[i].position.x + 25,
+                zombies[i].position.y + 25,
+                frameWidth * scale,
+                frameHeight * scale
+            };
+
+
+            // direção do zumbi até o player
+            Vector2 playerPos = {zombies[i].hitbox.x, zombies[i].hitbox.y}; // Ou use player->position se quiser passar o player aqui
+            Vector2 dir = {player->position.x - zombies[i].position.x, player->position.y - zombies[i].position.y};
+            float rotation = atan2f(dir.y, dir.x) * 180.0f / PI;
+
+            Vector2 origin = {(frameWidth * scale) / 2, (frameHeight * scale) / 2};
+            DrawTexturePro(zombies[i].texture, source, dest, origin, rotation-90, WHITE);
+
+            // Debug hitbox (opcional)
+            // DrawRectangleLines(zombies[i].hitbox.x, zombies[i].hitbox.y, zombies[i].hitbox.width, zombies[i].hitbox.height, RED);
         }
     }
 }
@@ -173,7 +208,7 @@ void DrawBullets(Texture2D bulletTexture) {
 }
 
 
-void getPlayerPos(Player *player, float delta, float PLAYER_SPEED, Object obstaculos[], Circle cadeiras[], Polygon poligonos[], Coletavel coletaveis[]) {
+void getPlayerPos(Player *player, float delta, float PLAYER_SPEED, Object obstaculos[], Circle cadeiras[], Polygon poligonos[], Coletavel coletaveis[], bool isReloading) {
 
     for (int i = 0; i < NUM_COLETAVEIS; i++) {
         if (!coletaveis[i].coletado &&
@@ -184,11 +219,11 @@ void getPlayerPos(Player *player, float delta, float PLAYER_SPEED, Object obstac
     }
     Vector2 movement = {0, 0};
     bool isMoving = false;
-
-    if (IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)) { movement.y -= PLAYER_SPEED * delta; player->direction = 1; isMoving = true; }
-    if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) { movement.x -= PLAYER_SPEED * delta; player->direction = 2; isMoving = true; }
-    if (IsKeyDown(KEY_S) && !IsKeyDown(KEY_W)) { movement.y += PLAYER_SPEED * delta; player->direction = 0; isMoving = true; }
-    if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) { movement.x += PLAYER_SPEED * delta; player->direction = 3; isMoving = true; }
+    float MUL = (isReloading) ? 0.5 : 1;
+    if (IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)) { movement.y -= PLAYER_SPEED * MUL * delta; player->direction = 1; isMoving = true; }
+    if (IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) { movement.x -= PLAYER_SPEED * MUL * delta; player->direction = 2; isMoving = true; }
+    if (IsKeyDown(KEY_S) && !IsKeyDown(KEY_W)) { movement.y += PLAYER_SPEED * MUL * delta; player->direction = 0; isMoving = true; }
+    if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) { movement.x += PLAYER_SPEED * MUL * delta; player->direction = 3; isMoving = true; }
 
     Rectangle PlayerRect = {player->position.x + movement.x, player->position.y + movement.y, 40, 40};
     bool hit = false;
@@ -255,10 +290,10 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
 
 void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture) {
     float delta = GetFrameTime();
-    int numZombies = 2;
+    int numZombies = 3;
     Rectangle spawnZones[2] = {
-        {0, 0, 60, 60},
-        {0, 0, 60, 60}
+        {282, 580, 400, 80},
+        {950, 78, 100, 200},
     };
 
     if (!coletaveisinicializados){ //booleano para garantir que ele gere os coletaveis uma vez 
@@ -269,7 +304,7 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     InicializarColetaveis(coletaveis, obstaculos, cadeiras, poligonos);
     coletaveisinicializados = true;}
     // Atualiza posição do jogador
-    getPlayerPos(player, delta, PLAYER_SPEED, obstaculos, cadeiras, poligonos, coletaveis);
+    getPlayerPos(player, delta, PLAYER_SPEED, obstaculos, cadeiras, poligonos, coletaveis, isReloading);
     for(int i = 0; i < numZombies; ++i) {
         if(zombies[i].alive) {
             ControlZombies(&zombies[i], player, delta, obstaculos, NUM_OBSTACULOS_REC, zombies, numZombies);
@@ -314,7 +349,7 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     // Desenha os projéteis
     DrawBullets(bulletTexture);
     DrawPlayer(*player, PLAYER_SPEED);
-    DrawZombies(zombies, numZombies);
+    DrawZombies(zombies, numZombies, player);
     FPS_visor();
     DrawText(TextFormat("Mouse X: %.0f Y: %.0f", mouse.x, mouse.y), 300, 10, 20, WHITE);
     DrawText(TextFormat("life: %.0f", player->life), 600, 10, 20, WHITE);

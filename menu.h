@@ -47,14 +47,17 @@ typedef struct Bullet {
 } Bullet;
 
 typedef struct Zombie {
-    bool alive;
     Vector2 position;
     Rectangle hitbox;
     Texture2D texture;
     float speed;
     float life;
-    int direction; 
+    bool alive;
+    int frame;
+    float timer;
+    int direction; // 0: baixo, 1: cima, 2: esquerda, 3: direita
 } Zombie;
+
 
 
 void FPS_visor();
