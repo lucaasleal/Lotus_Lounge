@@ -3,21 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define BASE_WIDTH 1280
 #define BASE_HEIGHT 720
 #define PLAYER_SPEED 100.0f
 
-bool coletaveisinicializados;
-Object obstaculos[NUM_OBSTACULOS_REC];
-Circle cadeiras[4]; //tive que declarar fora de player_main 
-Polygon poligonos[2];
-Coletavel coletaveis[NUM_COLETAVEIS];
-
-
 int main(void)
 {   
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(BASE_WIDTH, BASE_HEIGHT, "Lotus Lounge");  
     SetAudioStreamBufferSizeDefault(1024);
     InitAudioDevice();
@@ -31,7 +22,7 @@ int main(void)
     bool showSettings = false;
     bool showControls = false; // Mostrar tela de controles
     bool showCredit = false;
-    bool init = 0;
+    bool init = false;
 
     Texture2D spriteSheet = LoadTexture("assets//imagens//player.png");
     Texture2D bulletTexture = LoadTexture("assets//imagens//bullet.png");
@@ -41,8 +32,6 @@ int main(void)
 
     while (!WindowShouldClose())
     {   
-    
-
         UpdateMusicStream(Music_Lobby);
         if (!player.texture.id) {
             printf("Erro: Player não inicializado corretamente!\n");
@@ -55,11 +44,10 @@ int main(void)
             ToggleFullscreen();
         }
         if (init){
-            SetMusicVolume(Music_Lobby, 1.0f);
-            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG, bottleTexture);
-            
-        } else {
             SetMusicVolume(Music_Lobby, 0.5f);
+            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG, bottleTexture, &init);
+        } else {
+            SetMusicVolume(Music_Lobby, 1.0f);
             Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, &init);
         }
     }

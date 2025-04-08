@@ -288,7 +288,7 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
     DrawTexturePro(player.texture, source, dest, origin, rotation, WHITE);
 }
 
-void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture) {
+void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture, bool *init) {
     float delta = GetFrameTime();
     int numZombies = 3;
     Rectangle spawnZones[2] = {
@@ -339,6 +339,29 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
             isReloading = false;
             reloadTimer = 0.0f;
         }
+    }
+
+    static bool gameOver = false;
+
+    if (player->life <= 0) {
+        gameOver = true;
+    }
+
+    if (gameOver) {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText("GAME OVER", WIDTH/2 - MeasureText("GAME OVER", 50)/2, HEIGHT/2 - 25, 50, RED);
+        DrawText("Pressione [ENTER] para voltar ao menu", WIDTH/2 - MeasureText("Pressione [ENTER] para voltar ao menu", 20)/2, HEIGHT/2 + 40, 20, WHITE);
+        EndDrawing();
+        if (IsKeyPressed(KEY_ENTER)) {
+            coletaveisinicializados = false; // reinicia obstáculos/coletáveis
+            *init = false;
+            gameOver = false;
+            player->life = 100;
+            player->position = (Vector2){WIDTH/2, HEIGHT/2}; // ou posição inicial original
+            return; // retorna para que o main decida exibir o menu
+        }
+        return; // interrompe o resto do desenho se o jogo acabou
     }
 
     // Desenho da cena
