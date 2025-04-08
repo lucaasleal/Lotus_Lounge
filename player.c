@@ -26,16 +26,84 @@ extern Polygon poligonos[2];
 extern Coletavel coletaveis[NUM_COLETAVEIS];
 
 Bullet bullets[MAX_BULLETS];
+Zombie zombies[2];
 
-typedef struct zombie {
-    Vector2 position;
-    Rectangle hitbox;
-    Texture2D texture;
-    float speed;
-    float life;
-    int direction;
-    bool alive;
-} Zombie;
+void InitZombies(Zombie zombies[], int numZombies) {
+    for (int i = 0; i < numZombies; i++) {
+        zombies[i].alive = false;
+        zombies[i].hitbox = (Rectangle){0, 0, 50, 50};
+        zombies[i].texture = LoadTexture("imagens//zombie.png");
+    }
+}
+
+void SpawnZombies(Zombie zombies[], int numZombies, Rectangle spawnZones[], int numSpawnZones) {
+    for (int i = 0; i < numZombies; i++) {
+        if (!zombies[i].alive && GetRandomValue(0, 1000) <= 200) { // Spawn a new zombie every second
+            int spawnZoneIndex = rand() % numSpawnZones;
+            zombies[i].position.x = spawnZones[spawnZoneIndex].x + GetRandomValue(0, (int)(spawnZones[spawnZoneIndex].width - 50));
+            zombies[i].position.y = spawnZones[spawnZoneIndex].y + GetRandomValue(0, (int)(spawnZones[spawnZoneIndex].height - 50));
+            zombies[i].alive = true;
+            zombies[i].life = 100.0f + GetRandomValue(-20, 50);
+            zombies[i].speed = 50.0f + GetRandomValue(-20, 20);
+        }
+    }
+}
+
+void ControlZombies(Zombie *zombie, Player *player, float delta, Object obstaculos[], int NumObstaculos, Zombie zombies[], int numZombies) {
+    if (zombie->alive) {
+        Vector2 direction = {player->position.x - zombie->position.x, player->position.y - zombie->position.y};
+        float distance = sqrtf(direction.x * direction.x + direction.y * direction.y);
+        float MULT = 1.0f;
+        bool hit = false;
+        for(int i = 0; i < NumObstaculos; i++) {
+            if (CheckCollisionRecs((Rectangle){zombie->position.x, zombie->position.y, 50, 50}, obstaculos[i].rect)) {
+                MULT = 0.5f;
+            }
+        }
+        /*
+        for(int i = 0; i < numZombies; i++) {
+            if (zombie != &zombies[i] && zombies[i].alive) {
+                if (CheckCollisionRecs(zombie->hitbox, zombies[i].hitbox)) {
+                    hit = true;
+                }
+            }
+        }
+        */
+        if(!hit) {
+            if (distance > 30) {
+                direction.x /= distance;
+                direction.y /= distance;
+                zombie->position.x += direction.x * zombie->speed * delta * MULT;
+                zombie->position.y += direction.y * zombie->speed * delta * MULT;
+
+                // Atualiza a hitbox do zumbi
+                zombie->hitbox.x = zombie->position.x;
+                zombie->hitbox.y = zombie->position.y;
+            } else {
+                player->life -= 0.1f; // Dano ao jogador se o zumbi colidir
+            }            
+        }
+    }
+}
+
+void CheckBulletCollision(Zombie *zombie, Bullet *bullet) {
+    if (bullet->active && CheckCollisionRecs(zombie->hitbox, (Rectangle){bullet->position.x, bullet->position.y, 10, 10})) {
+        bullet->active = false;
+        zombie->life -= 30.0f; // Dano ao zumbi
+        if (zombie->life <= 0) {
+            zombie->alive = false; // Zumbi morre
+        }
+    }
+}
+
+void DrawZombies(Zombie zombies[], int numZombies) {
+    for (int i = 0; i < numZombies; i++) {
+        if (zombies[i].alive) {
+            // draw a box for debbugging
+            DrawRectangle(zombies[i].hitbox.x, zombies[i].hitbox.y, zombies[i].hitbox.width, zombies[i].hitbox.height, RED);
+        }
+    }
+}
 
 float GetDistance(Vector2 a, Vector2 b) {
     return sqrtf((b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y));
@@ -185,11 +253,16 @@ void DrawPlayer(Player player, float PLAYER_SPEED) {
     DrawTexturePro(player.texture, source, dest, origin, rotation, WHITE);
 }
 
-void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture, Rectangle spawnZones[]) {
+void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture) {
     float delta = GetFrameTime();
-    
+    int numZombies = 2;
+    Rectangle spawnZones[2] = {
+        {0, 0, 60, 60},
+        {0, 0, 60, 60}
+    };
 
     if (!coletaveisinicializados){ //booleano para garantir que ele gere os coletaveis uma vez 
+    InitZombies(zombies, numZombies);
     InicializarObstaculos(obstaculos);
     InicializarCadeiras(cadeiras);
     InicializarPoligonos(poligonos);
@@ -197,6 +270,16 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     coletaveisinicializados = true;}
     // Atualiza posição do jogador
     getPlayerPos(player, delta, PLAYER_SPEED, obstaculos, cadeiras, poligonos, coletaveis);
+    for(int i = 0; i < numZombies; ++i) {
+        if(zombies[i].alive) {
+            ControlZombies(&zombies[i], player, delta, obstaculos, NUM_OBSTACULOS_REC, zombies, numZombies);
+        }
+    }
+    for(int i = 0; i < currentBullets; i++) {
+        for (int j = 0; j < numZombies; j++) {
+            CheckBulletCollision(&zombies[j], &bullets[i]);
+        }
+    }
 
     // Atira ao apertar espaço
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -204,6 +287,8 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     }
     // Atualiza os tiros
     UpdateBullets(delta);
+    // Seta a posição dos zombies
+    SpawnZombies(zombies, numZombies, spawnZones, 2);
 
     //Lógica de Recarga
     if (((IsKeyPressed(KEY_R) && currentBullets < MAX_BULLETS) || 
@@ -229,8 +314,10 @@ void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Text
     // Desenha os projéteis
     DrawBullets(bulletTexture);
     DrawPlayer(*player, PLAYER_SPEED);
+    DrawZombies(zombies, numZombies);
     FPS_visor();
     DrawText(TextFormat("Mouse X: %.0f Y: %.0f", mouse.x, mouse.y), 300, 10, 20, WHITE);
+    DrawText(TextFormat("life: %.0f", player->life), 600, 10, 20, WHITE);
 
     //Mostra Nº de Balas
     DrawText(TextFormat("Balas: %d/%d", currentBullets, MAX_BULLETS), WIDTH-160, HEIGHT-90, 20, WHITE);

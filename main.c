@@ -65,7 +65,7 @@ int main(void)
         }
         if (init){
             SetMusicVolume(Music_Lobby, 1.0f);
-            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG, bottleTexture, spawnZones);
+            Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG, bottleTexture);
             
         } else {
             SetMusicVolume(Music_Lobby, 0.5f);
