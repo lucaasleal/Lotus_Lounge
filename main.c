@@ -34,10 +34,10 @@ int main(void)
     int selectedResolution = 1; // Índice da resolução atual (1920x1080)
     bool init = 0;
 
-    Texture2D spriteSheet = LoadTexture("imagens//player.png");
-    Texture2D bulletTexture = LoadTexture("imagens//bullet.png");
-    Texture2D phaseOneBG = LoadTexture("imagens/lotus_lounge_bar.png");
-    Texture2D bottleTexture = LoadTexture("imagens//bottle.png");
+    Texture2D spriteSheet = LoadTexture("assets//imagens//player.png");
+    Texture2D bulletTexture = LoadTexture("assets//imagens//bullet.png");
+    Texture2D phaseOneBG = LoadTexture("assets//imagens//lotus_lounge_bar.png");
+    Texture2D bottleTexture = LoadTexture("assets//imagens//bottle.png");
     Player player = InitPlayer(spriteSheet, (Vector2){BASE_WIDTH / 2, BASE_HEIGHT / 2}, PLAYER_SPEED);
 
     Rectangle spawnZones[5];

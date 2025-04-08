@@ -58,7 +58,7 @@ void ShootBullet(Player *player) {
         if (!bullets[i].active) {
             bullets[i].position = (Vector2){player->position.x+25, player->position.y+25}; // centro do boneco
             float angle = (getPlayerRotation(player)  - 90.0f)* (PI / 180.0f);
-            bullets[i].velocity = (Vector2){cosf(angle) * 500, sinf(angle) * 500}; // velocidade
+            bullets[i].velocity = (Vector2){cosf(angle) * 1000, sinf(angle) * 1000}; // velocidade
             bullets[i].active = true;
             currentBullets--;
             break;
@@ -89,7 +89,7 @@ void DrawBullets(Texture2D bulletTexture) {
         if (bullets[i].active) {
             float rotation = atan2f(bullets[i].velocity.y, bullets[i].velocity.x) * 180.0f / PI;
             // Tamanho da bala na tela
-            float scale = 0.02f;
+            float scale = 0.01f;
             Rectangle source = {0, 0, (float)bulletTexture.width, (float)bulletTexture.height};
             Rectangle dest = {
                 bullets[i].position.x,
@@ -122,7 +122,7 @@ void getPlayerPos(Player *player, float delta, float PLAYER_SPEED, Object obstac
     if (IsKeyDown(KEY_S) && !IsKeyDown(KEY_W)) { movement.y += PLAYER_SPEED * delta; player->direction = 0; isMoving = true; }
     if (IsKeyDown(KEY_D) && !IsKeyDown(KEY_A)) { movement.x += PLAYER_SPEED * delta; player->direction = 3; isMoving = true; }
 
-    Rectangle PlayerRect = {player->position.x + movement.x, player->position.y + movement.y, 50, 50};
+    Rectangle PlayerRect = {player->position.x + movement.x, player->position.y + movement.y, 40, 40};
     bool hit = false;
 
     for (int i = 0; i < NUM_OBSTACULOS_REC; i++) {
@@ -153,7 +153,7 @@ void getPlayerPos(Player *player, float delta, float PLAYER_SPEED, Object obstac
     if (isMoving) {
         player->timer += delta;
         if (player->timer >= 0.1f) {
-            player->frame = (player->frame + 1) % 4; // Alterna entre 4 frames
+            player->frame = (player->frame + 1) % 9; // Alterna entre 4 frames
             player->timer = 0;
         }
     } else {

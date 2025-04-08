@@ -41,7 +41,7 @@ int main() {
     InitWindow(1280, 720, "Fase 2 - Banheiro");
     SetTargetFPS(60);
 
-    Texture2D mapa = LoadTexture("imagens/Banheiro_jogo.PNG");
+    Texture2D mapa = LoadTexture("assets/imagens/lotus_lounge_banheiro.PNG");
 
     Object obstaculos[MAX_OBSTACULOS];
     InicializarObstaculosPhaseTwo(obstaculos);

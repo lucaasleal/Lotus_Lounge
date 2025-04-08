@@ -20,7 +20,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
     float scaleX = (float)screenWidth / WIDTH;
     float scaleY = (float)screenHeight / HEIGHT;
     
-    Texture2D texture = LoadTexture("imagens\\menu.png");
+    Texture2D texture = LoadTexture("assets//imagens//menu.png");
     int fontSize = 40 * scaleY;
     int textY = screenHeight / 4;
     // Define o retângulo de destino (centralizado na tela da atual diemensão)
@@ -50,7 +50,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
 
     
     if (CheckCollisionPointRec(mousePos, btnPlay)){
-        texture = LoadTexture("imagens\\play.png");
+        texture = LoadTexture("assets//imagens//play.png");
         DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, WHITE);
         DrawText("Iniciar", screenWidth / 2 - 57 * scaleX, screenHeight/2.45, 15 * scaleY, BLACK);
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -59,7 +59,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
     }
     
     if (CheckCollisionPointRec(mousePos, btnControls)){
-        texture = LoadTexture("imagens\\controles.png");
+        texture = LoadTexture("assets//imagens//controles.png");
         DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, WHITE);
         if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             *showControls = !(*showControls);
@@ -67,7 +67,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
     }
     
     if (CheckCollisionPointRec(mousePos, btnSettings)){ 
-        texture = LoadTexture("imagens\\config.png");
+        texture = LoadTexture("assets//imagens//config.png");
         DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, WHITE);
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             *showSettings = !(*showSettings);
@@ -75,7 +75,7 @@ void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *s
     }
 
     if (CheckCollisionPointRec(mousePos, btnExit)){ 
-        texture = LoadTexture("imagens\\destexit.png");
+        texture = LoadTexture("assets//imagens//destexit.png");
         DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, WHITE);
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             CloseWindow();
