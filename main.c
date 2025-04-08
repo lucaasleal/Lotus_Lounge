@@ -35,6 +35,7 @@ int main(void)
     bool showControls = false; // Mostrar tela de controles
     bool showCredit = false;
     bool init = false;
+    int level = 0;  // 0 = menu, 1 = fase 1, 2 = fase 2
     int currentMusic = 0;       // 0 = menu, 1 = fase 1, 2 = fase 2
 
     Texture2D spriteSheet = LoadTexture("assets//imagens//player.png");
@@ -80,10 +81,11 @@ int main(void)
             ToggleFullscreen();
         }
         if (init){
-            SetMusicVolume(Music_Lobby, 0.5f);
+            level = 1;
+            SetMusicVolume(musicFase1, 0.5f);
             Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG, bottleTexture, &init);
         } else {
-            SetMusicVolume(Music_Lobby, 1.0f);
+            SetMusicVolume(musicFase1, 1.0f);
             Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, &init);
         }
     }
