@@ -69,7 +69,7 @@ Coletavel coletaveis[NUM_COLETAVEIS];
 
 void FPS_visor();
 void Menu(int WIDTH, int HEIGHT, bool *isFullscreen, bool *showSettings, bool *showControls, bool *showCredit, bool *init);
-void text_board(int *framesCounter, int *letterCount, int *velocidade);
+bool text_board(int *framesCounter, int *letterCount, int *velocidade, const char *text[], int numLines);
 Player InitPlayer(Texture2D texture, Vector2 position, float PLAYER_SPEED);
 void Player_main(int WIDTH, int HEIGHT, float PLAYER_SPEED, Player *player, Texture2D bulletTexture, Texture2D phaseOneBG, Texture2D bottleTexture, bool *init);
 
@@ -79,6 +79,9 @@ void InicializarCadeiras(Circle cadeiras[]);
 void InicializarPoligonos(Polygon poligonos[]);
 void InicializarColetaveis(Coletavel coletaveis[], Object obstaculos[], Circle cadeiras[], Polygon poligonos[]);
 int CheckCollisionRecPoly(Rectangle Rec, Polygon poly);
+
+
+
 
 #include "menu.c"
 #include "game.c"
