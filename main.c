@@ -7,8 +7,24 @@
 #define BASE_HEIGHT 720
 #define PLAYER_SPEED 100.0f
 
+const char *intro_text[] = {
+    "Voce e um ex-policial.",
+    "Esperando uma aposentadoria que nunca veio.",
+    "Sem rumo, voce decide afogar as magoas",
+    "no bar mais sujo da cidade: o Lotus Lounge.",
+    "Apos a quinta cerveja...",
+    "...o mundo muda.",
+    "Zumbis invadem a cidade. O apocalipse comecou.",
+    "Agora, sua missao e simples:",
+    "Colete 5 garrafas de vodka, mantenha-se vivo",
+    "e encontre uma saida desse pesadelo.",
+    "Sua sanidade e sua ressaca dependem disso."
+};
+int numIntroLines = sizeof(intro_text) / sizeof(intro_text[0]);
+
 int main(void)
 {   
+    
     InitWindow(BASE_WIDTH, BASE_HEIGHT, "Lotus Lounge");  
     SetAudioStreamBufferSizeDefault(1024);
     InitAudioDevice();
@@ -35,6 +51,10 @@ int main(void)
     bool showControls = false; // Mostrar tela de controles
     bool showCredit = false;
     bool init = false;
+    bool showIntro = true;
+    int framesCounter = 0;
+    int letterCount = 0;
+    int velocidade = 1;
     int level = 0;  // 0 = menu, 1 = fase 1, 2 = fase 2
     int currentMusic = 0;       // 0 = menu, 1 = fase 1, 2 = fase 2
 
@@ -80,12 +100,20 @@ int main(void)
         if (IsKeyPressed(KEY_F)) {
             ToggleFullscreen();
         }
-        if (init){
+        if (showIntro) {
+            bool terminou = text_board(&framesCounter, &letterCount, &velocidade, intro_text, numIntroLines);
+            if (terminou) {
+                showIntro = false;
+                framesCounter = 0;
+                letterCount = 0;
+            }
+            continue;
+        } else if (init){
             level = 1;
             SetMusicVolume(musicFase1, 0.5f);
             Player_main(BASE_WIDTH, BASE_HEIGHT, PLAYER_SPEED, &player, bulletTexture, phaseOneBG, bottleTexture, &init);
         } else {
-            SetMusicVolume(musicFase1, 1.0f);
+            SetMusicVolume(musicMenu, 1.0f);
             Menu(BASE_WIDTH, BASE_HEIGHT, &isFullscreen, &showSettings, &showControls, &showCredit, &init);
         }
     }
