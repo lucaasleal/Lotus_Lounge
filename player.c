@@ -10,6 +10,8 @@
 #ifndef PI
 #define PI 3.14
 #endif
+//Teste
+// #define MAX_ZOMBIES 100
 
 #define MAX_BULLETS 20
 #define RELOAD_TIME 2.0f // em segundos
